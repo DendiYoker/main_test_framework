@@ -1,0 +1,34 @@
+import allure
+
+from core import environment_settings
+from core.logging import log
+
+from pages import __all__
+
+#__tracebackhide__ = True
+
+class BaseTest(object):
+
+    @classmethod
+    def setup_method(cls, method):
+        with allure.step("setup_method"):
+            log('Залезли в setup_method')
+            len(__all__) #init all pages
+            log(f'setup metod: {method.__name__}')
+
+
+    @staticmethod
+    def set_page(page_name):
+        environment_settings.PF.set_current_page(page_name)
+
+    @staticmethod
+    def run_step():
+        pass
+
+    @classmethod
+    def teardown_method(cls, method):
+        with allure.step('запуск teardown_method'):
+            log('воть teardown_method')
+
+
+
