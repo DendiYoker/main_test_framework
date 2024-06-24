@@ -1,0 +1,11 @@
+# created by virtualenv automatically
+*
+
+# Игнорировать каталога reports - отчеты allure
+reports
+
+# Игнорировать виртуальное окружение и другие папки
+VENV
+Lib
+Scripts
+.pytest_cache
