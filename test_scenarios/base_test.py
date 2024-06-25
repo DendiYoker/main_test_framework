@@ -4,6 +4,7 @@ from core import environment_settings
 from core.logging import log
 
 from pages import __all__
+from core.setup_test_env import set_logger
 
 #__tracebackhide__ = True
 
@@ -12,6 +13,7 @@ class BaseTest(object):
     @classmethod
     def setup_method(cls, method):
         with allure.step("setup_method"):
+            set_logger()
             log('Залезли в setup_method')
             len(__all__) #init all pages
             log(f'setup metod: {method.__name__}')
