@@ -6,14 +6,14 @@ from core.page_factory import PageFactory
 from core import environment_settings
 
 
-def story(str):
-    environment_settings.stash["STORY"] = str
-    return allure.story(str)
+def story(number_story):
+    environment_settings.stash["STORY"] = number_story
+    return allure.story(number_story)
 
 
-def feature(str):
-    environment_settings.stash["FEATURE"] = str
-    return allure.feature(str)
+def feature(number_feature):
+    environment_settings.stash["FEATURE"] = number_feature
+    return allure.feature(number_feature)
 
 
 def init(page):
@@ -24,5 +24,4 @@ def init(page):
     """
     if environment_settings.PF is None:
         environment_settings.PF = PageFactory()
-
     page()

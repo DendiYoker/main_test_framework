@@ -4,7 +4,7 @@ import pytest
 from core.core_fixtures import story, feature
 from core.logging import log
 from test_scenarios.base_test import BaseTest
-from core.tools import now
+from core.tools import current_time
 from core import environment_settings
 
 @feature('Nice_test')
@@ -12,7 +12,7 @@ class Test11(BaseTest):
     @story('001')
     @allure.description('Описание первого теста')
     def test_001(self):
-        with allure.step(f"{now()} шаг 1"):
+        with allure.step(f"{current_time()} шаг 1"):
             log('тестируем приклад 1', 'какой то аттач')
         log(f"Завершаем тест № 1")
 

@@ -1,6 +1,7 @@
 import logging
 import allure
-from core.tools import now
+from core.tools import current_time
+from core import environment_settings
 
 
 def log(message, attach='attachment'):
@@ -10,17 +11,5 @@ def log(message, attach='attachment'):
     :param attach: Содержательная часть (по умолчанию attachment)
     :return:
     """
-
-    logger_ingo = logging.getLogger()
-    logger_ingo.setLevel(logging.INFO)
-    # Обработчик добавляется каждый раз, когда вызывается из вне, поэтому необходимо очистить
-    logger_ingo.handlers.clear()
-
-    handler_1 = logging.StreamHandler()
-    formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
-
-    handler_1.setFormatter(formatter)
-    logger_ingo.addHandler(handler_1)
-
-    allure.attach(name=f'{now()}: {message}', body=attach, attachment_type=allure.attachment_type.TEXT)
-    logger_ingo.info(f"{message}") if attach == 'attachment' else logger_ingo.info(f"{message}: {attach}")
+    allure.attach(name=f'{current_time()}: {message}', body=attach, attachment_type=allure.attachment_type.TEXT)
+    environment_settings.logger.info(f"{message}" if attach == 'attachment' else f"{message}: {attach}")
