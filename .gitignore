@@ -9,3 +9,4 @@ VENV
 Lib
 Scripts
 .pytest_cache
+for_test_raznoe.py
