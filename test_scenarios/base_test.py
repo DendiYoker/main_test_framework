@@ -4,7 +4,7 @@ from core import environment_settings
 from core.logging import log
 
 from pages import __all__
-from core.setup_test_env import set_logger, clear_reports_dir
+from core.setup_test_env import set_logger, clear_reports_dir, set_browser, close_browser
 
 
 #__tracebackhide__ = True
@@ -16,8 +16,10 @@ class BaseTest(object):
         with allure.step("setup_method"):
             len(__all__)  #init all pages
             set_logger()
-            clear_reports_dir()
             log(f'setup metod: {method.__name__}')
+            clear_reports_dir()
+            set_browser()
+
 
     @staticmethod
     def set_page(page_name):
@@ -31,3 +33,4 @@ class BaseTest(object):
     def teardown_method(cls, method):
         with allure.step('запуск teardown_method'):
             log('воть teardown_method')
+            close_browser()
