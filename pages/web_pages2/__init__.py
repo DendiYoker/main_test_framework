@@ -1,4 +1,4 @@
-from pages.web_pages2 import authorization
-from pages.web_pages2 import home
+from pages.web_pages2 import for_del2
+from pages.web_pages2 import for_del3
 
-website2 = {authorization, home}
+website2 = {for_del2, for_del3}

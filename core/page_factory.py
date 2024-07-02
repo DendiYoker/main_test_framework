@@ -7,14 +7,13 @@ class PageFactory:
     pages: list = []
     current_page = None
 
-    def append(self, page):
+    def append_page(self, page):
         """
         Функция добавляет новую страницу в фабрику
         :param page: экземпляр класса расширяющего класс Page
         :return:
         """
         self.pages.append(page)
-        self.pages
 
     def get_page_by_title(self, title):
         """
