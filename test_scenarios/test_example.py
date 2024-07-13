@@ -7,14 +7,14 @@ from test_scenarios.base_test import BaseTest
 from core.tools import current_time
 from core import environment_settings
 
+
 @feature('Nice_test')
 class Test11(BaseTest):
     @story('001')
     @allure.description('Описание первого теста')
-    def test_001(self):
-        with allure.step(f"{current_time()} шаг 1"):
-            log('тестируем приклад 1', 'какой то аттач')
-        log(f"Завершаем тест № 1")
+    def test_orangeherm_authorization(self):
+        self.set_page('Страница авторизации Orangehrm')
+        self.run_step('проверить_авторизацию')
 
 
 class Test12(BaseTest):
@@ -22,8 +22,5 @@ class Test12(BaseTest):
     @story('002')
     @allure.description('Описание второго теста')
     def test_002(self):
-        with allure.step("шаг 2"):
-            log('тестируем приклад 2', 'какой то аттач')
-        log(f"Завершаем тест № 2")
-
-
+        self.set_page('Страница теста мыши SeleniumDev')
+        self.run_step('тестирование_возможноcти_мыши')

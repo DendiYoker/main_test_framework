@@ -1,17 +1,29 @@
 import time
 import pytest
 import allure
+import datetime
 
 from core.page_factory import PageFactory
 from core import environment_settings
+from core.logging import log
 
 
 def story(number_story):
+    """
+    Для запуска конкретного теста
+    :param number_story:
+    :return: allure.story(number_story)
+    """
     environment_settings.stash["STORY"] = number_story
     return allure.story(number_story)
 
 
 def feature(number_feature):
+    """
+        Для запуска группы тестов
+        :param number_feature:
+        :return: allure.feature(number_feature)
+    """
     environment_settings.stash["FEATURE"] = number_feature
     return allure.feature(number_feature)
 
