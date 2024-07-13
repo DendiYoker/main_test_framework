@@ -6,6 +6,7 @@ from core.logging import log
 
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.support.wait import WebDriverWait
 
 
 def set_logger():
@@ -45,10 +46,13 @@ def set_browser():
     options.add_argument("--disable-notifications")
     # Отключается блокировка всплывающих окон
     options.add_argument("—disable-popup-blocking")
-
-    environment_settings.browser_chrome = webdriver.Chrome(options=options)
-
+    # normal (полная загрузка страницы)
+    #options.set_capability('pageLoadStrategy', "normal")
+    environment_settings.driver_chrome = webdriver.Chrome(options=options)
+    environment_settings.driver_wait_short = WebDriverWait(environment_settings.driver_chrome,
+                                                           environment_settings.SHORT_TIME_WAIT)
 
 def close_browser():
-    if environment_settings.browser_chrome is not None:
-        environment_settings.browser_chrome.quit()
+    if environment_settings.driver_chrome is not None:
+        environment_settings.driver_chrome.quit()
+    log(f'Драйвер браузера закрыт')

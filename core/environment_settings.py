@@ -8,4 +8,6 @@ from core.page_factory import PageFactory
 PF: PageFactory = None
 stash: set = {}
 logger = None
-browser_chrome: webdriver = None
+driver_chrome: webdriver = None
+driver_wait_short = None
+SHORT_TIME_WAIT = 10

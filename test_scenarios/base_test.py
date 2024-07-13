@@ -1,4 +1,7 @@
+import time
+
 import allure
+import datetime
 
 from core import environment_settings
 from core.logging import log
@@ -29,13 +32,14 @@ class BaseTest(object):
     @staticmethod
     def run_step(step, *args):
         log(f'Запущен шаг: {step}')
-        #start = current_time().replace(microsecond=0)
+        start = datetime.datetime.now().replace(microsecond=0)
         with allure.step(step):
             try:
                 environment_settings.PF.run_action(step, *args)
-                #end = current_time().replace(microsecond=0)
-                #log(f'шаг отработал за {start - end} секунд')
+                end = datetime.datetime.now().replace(microsecond=0)
+                log(f'шаг отработал за {end - start} секунд')
             except:
+                # ToDo подумать про проброску ошибок с шагов теста
                 raise 'шаг запущен с ошибкой'
 
 

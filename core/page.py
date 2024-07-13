@@ -8,4 +8,3 @@ class Page:
         if not environment_settings.PF is None:
             environment_settings.PF.append_page(self)
             environment_settings.PF.set_current_page(self.title)
-            temp = 1
