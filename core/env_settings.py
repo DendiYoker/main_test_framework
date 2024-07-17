@@ -1,13 +1,14 @@
 import sys
-#from typing import re
 from selenium import webdriver
 
 from core.page_factory import PageFactory
 
-#IN_ARGS = re.split("|=", " ".join(sys.argv))
+IN_ARGS = sys.argv
 PF: PageFactory = None
-stash: set = {}
+stash: dict = {}
 logger = None
 driver_chrome: webdriver = None
 driver_wait_short = None
 SHORT_TIME_WAIT = 10
+STAND = None
+stand_settings: dict = {}

@@ -1,12 +1,23 @@
+import pytest
+import configparser
 import pathlib
 import logging
 
-from core import environment_settings
+from core import env_settings
 from core.logging import log
 
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.wait import WebDriverWait
+
+
+
+def config_parser():
+    """
+    Парсинг файла config.ini в методе setup_method
+    """
+    t = configparser.ConfigParser()
+    t.read('config.ini')
 
 
 def set_logger():
@@ -21,7 +32,7 @@ def set_logger():
     formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
     handler.setFormatter(formatter)
     logger.addHandler(handler)
-    environment_settings.logger = logger
+    env_settings.logger = logger
 
 
 def clear_reports_dir():
@@ -48,11 +59,11 @@ def set_browser():
     options.add_argument("—disable-popup-blocking")
     # normal (полная загрузка страницы)
     #options.set_capability('pageLoadStrategy', "normal")
-    environment_settings.driver_chrome = webdriver.Chrome(options=options)
-    environment_settings.driver_wait_short = WebDriverWait(environment_settings.driver_chrome,
-                                                           environment_settings.SHORT_TIME_WAIT)
+    env_settings.driver_chrome = webdriver.Chrome(options=options)
+    env_settings.driver_wait_short = WebDriverWait(env_settings.driver_chrome,
+                                                           env_settings.SHORT_TIME_WAIT)
 
 def close_browser():
-    if environment_settings.driver_chrome is not None:
-        environment_settings.driver_chrome.quit()
+    if env_settings.driver_chrome is not None:
+        env_settings.driver_chrome.quit()
     log(f'Драйвер браузера закрыт')

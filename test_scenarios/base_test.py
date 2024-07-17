@@ -3,12 +3,16 @@ import time
 import allure
 import datetime
 
-from core import environment_settings
+import pytest
+
+
+from conftest import args_stand
+from core import env_settings
 from core.logging import log
 from core.tools import current_time
 
 from pages import __all__
-from core.setup_test_env import set_logger, clear_reports_dir, set_browser, close_browser
+from core.setup_test_env import set_logger, clear_reports_dir, set_browser, close_browser, config_parser
 
 
 #__tracebackhide__ = True
@@ -27,7 +31,7 @@ class BaseTest(object):
 
     @staticmethod
     def set_page(page_name):
-        environment_settings.PF.set_current_page(page_name)
+        env_settings.PF.set_current_page(page_name)
 
     @staticmethod
     def run_step(step, *args):
@@ -35,7 +39,7 @@ class BaseTest(object):
         start = datetime.datetime.now().replace(microsecond=0)
         with allure.step(step):
             try:
-                environment_settings.PF.run_action(step, *args)
+                env_settings.PF.run_action(step, *args)
                 end = datetime.datetime.now().replace(microsecond=0)
                 log(f'шаг отработал за {end - start} секунд')
             except:
