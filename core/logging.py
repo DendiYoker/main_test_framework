@@ -1,7 +1,7 @@
 import logging
 import allure
 from core.tools import current_time
-from core import environment_settings
+from core import env_settings
 
 
 def log(message, attach='attachment'):
@@ -12,4 +12,4 @@ def log(message, attach='attachment'):
     :return:
     """
     allure.attach(name=f'{current_time()}: {message}', body=attach, attachment_type=allure.attachment_type.TEXT)
-    environment_settings.logger.info(f"{message}" if attach == 'attachment' else f"{message}: {attach}")
+    env_settings.logger.info(f"{message}" if attach == 'attachment' else f"{message}: {attach}")

@@ -4,7 +4,7 @@ import allure
 import datetime
 
 from core.page_factory import PageFactory
-from core import environment_settings
+from core import env_settings
 from core.logging import log
 
 
@@ -14,7 +14,8 @@ def story(number_story):
     :param number_story:
     :return: allure.story(number_story)
     """
-    environment_settings.stash["STORY"] = number_story
+    #ToDo перезаписыавет стори проходясь по всем
+    env_settings.stash["STORY"] = number_story
     return allure.story(number_story)
 
 
@@ -24,7 +25,7 @@ def feature(number_feature):
         :param number_feature:
         :return: allure.feature(number_feature)
     """
-    environment_settings.stash["FEATURE"] = number_feature
+    env_settings.stash["FEATURE"] = number_feature
     return allure.feature(number_feature)
 
 
@@ -34,6 +35,6 @@ def init(page):
     :param page: класс страницы
     :return:
     """
-    if environment_settings.PF is None:
-        environment_settings.PF = PageFactory()
+    if env_settings.PF is None:
+        env_settings.PF = PageFactory()
     page()

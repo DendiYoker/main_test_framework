@@ -5,7 +5,7 @@ from core.core_fixtures import story, feature
 from core.logging import log
 from test_scenarios.base_test import BaseTest
 from core.tools import current_time
-from core import environment_settings
+from core import env_settings
 
 
 @feature('Nice_test')

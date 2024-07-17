@@ -4,7 +4,7 @@ import allure
 from core.logging import log
 from core.page import Page
 from core.web_element import WebElementHelper
-from core import environment_settings as ES
+from core import env_settings as ES
 
 
 class WebBasePage(Page):
