@@ -5,6 +5,7 @@ from core.logging import log
 from core.page import Page
 from core.web_element import WebElementHelper
 from core import env_settings as ES
+from selenium.common.exceptions import InvalidSessionIdException
 
 
 class WebBasePage(Page):
@@ -14,6 +15,7 @@ class WebBasePage(Page):
     def открыть_web_страницу(url):
         ES.driver_chrome.get(url)
         log(f'Открыта web страница {url}')
+
 
     @staticmethod
     def заполнить_поле(text, locator):
