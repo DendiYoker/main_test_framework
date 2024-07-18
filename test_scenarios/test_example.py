@@ -16,6 +16,11 @@ class Test11(BaseTest):
         self.set_page('Страница авторизации Orangehrm')
         self.run_step('проверить_авторизацию')
 
+    @story('003')
+    @allure.description('Описание 3 теста')
+    def test_authorization(self):
+        print('опа')
+
 
 class Test12(BaseTest):
 

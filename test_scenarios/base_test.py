@@ -1,18 +1,11 @@
-import time
-
 import allure
 import datetime
 
-import pytest
-
-
-from conftest import args_stand
 from core import env_settings
 from core.logging import log
-from core.tools import current_time
 
 from pages import __all__
-from core.setup_test_env import set_logger, clear_reports_dir, set_browser, close_browser, config_parser
+from core.setup_test_env import set_browser, close_browser, set_story
 
 
 #__tracebackhide__ = True
@@ -23,10 +16,9 @@ class BaseTest(object):
     def setup_method(cls, method):
         with allure.step("setup_method"):
             len(__all__)  #init all pages
-            set_logger()
             log(f'setup metod: {method.__name__}')
-            clear_reports_dir()
             set_browser()
+            set_story(cls, method)
 
 
     @staticmethod
@@ -50,5 +42,5 @@ class BaseTest(object):
     @classmethod
     def teardown_method(cls, method):
         with allure.step('запуск teardown_method'):
-            log('воть teardown_method')
+            log('teardown_method запущен')
             close_browser()
