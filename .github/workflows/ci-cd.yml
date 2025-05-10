@@ -1,0 +1,38 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ "master" ]  # Триггер на мерж в master
+
+jobs:
+  test-and-deploy:
+    runs-on: ubuntu-latest   # Используем последний Ubuntu
+    timeout-minutes: 30      # Максимальное время выполнения
+
+    steps:
+      # Шаг 1: Клонирование кода
+      - name: Checkout code
+        uses: actions/checkout@v4  # Версия действия для клонирования
+
+      # Шаг 2: Установка зависимостей и запуск тестов
+      - name: Run tests
+        run: |
+          pip install -r requirements.txt  # Установка зависимостей
+          pytest -v tests/ --junitxml=test-results.xml  # Запуск тестов
+
+      # Шаг 3: Сборка Docker-образа
+      - name: Build Docker image
+        run: docker build -t test-runner .  # Сборка образа
+
+      # Шаг 4: Деплой на сервер через SSH
+      - name: Deploy to VM
+        uses: appleboy/ssh-action@v1.0.0  # Действие для SSH
+        with:
+          host: ${{ secrets.VM_HOST }}      # IP сервера из секретов
+          username: ${{ secrets.VM_USERNAME }}  # Пользователь SSH
+          key: ${{ secrets.VM_SSH_KEY }}    # Приватный ключ
+          script: |  # Команды для выполнения на сервере
+            cd /opt/automation
+            git pull origin master
+            docker-compose down
+            docker-compose up -d --build
