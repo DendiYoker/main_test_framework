@@ -18,8 +18,9 @@ jobs:
       - name: Run tests
         run: |
           pip install -r requirements.txt  # Установка зависимостей
-          pytest -v tests/ --junitxml=test-results.xml  # Запуск тестов
-
+          pytest -v test_scenarios/ --junitxml=test-results.xml  # Запуск тестов
+        # Или укажите конкретный файл:
+        # pytest -v tests/test_example.py
       # Шаг 3: Сборка Docker-образа
       - name: Build Docker image
         run: docker build -t test-runner .  # Сборка образа
