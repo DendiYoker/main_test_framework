@@ -21,6 +21,7 @@ jobs:
           pytest -v test_scenarios/ --junitxml=test-results.xml  # Запуск тестов
         # Или укажите конкретный файл:
         # pytest -v tests/test_example.py
+
       # Шаг 3: Сборка Docker-образа
       - name: Build Docker image
         run: docker build -t test-runner .  # Сборка образа
