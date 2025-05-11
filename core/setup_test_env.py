@@ -1,5 +1,7 @@
+import os
 import pathlib
 import logging
+import platform
 
 from core import env_settings
 from core.logging import log
@@ -7,6 +9,8 @@ from core.logging import log
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.wait import WebDriverWait
+from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.chrome.service import Service
 
 
 def set_logger():
@@ -35,21 +39,28 @@ def clear_reports_dir():
 
 def set_browser():
     options = Options()
-    # аргумент для запуска браузера в режиме максимального окна.
-    options.add_argument("start-maximized")
-    # экспериментальная опция, исключающая переключатель "enable-automation", чтобы предотвратить автоматическое
-    # обнаружение, что браузер управляется WebDriver.
-    options.add_experimental_option("excludeSwitches", ["enable-automation"])
-    # экспериментальная опция, отключающая расширение автоматизации в браузере, что также помогает скрыть
-    # использование WebDriver.
-    options.add_experimental_option('useAutomationExtension', False)
-    # Отключаются уведомления в браузере.
-    options.add_argument("--disable-notifications")
-    # Отключается блокировка всплывающих окон
-    options.add_argument("—disable-popup-blocking")
-    # normal (полная загрузка страницы)
-    # options.set_capability('pageLoadStrategy', "normal")
-    env_settings.driver_chrome = webdriver.Chrome(options=options)
+
+    # Настройка для Linux (без GUI)
+    if platform.system() == 'Linux':
+        options.add_argument("--no-sandbox")  # отключаем sanbox, необходимо для работы Docker CI
+        options.add_argument("--disable-dev-shm-usage")  # отключаем shared memory (решает проблемы в Linux)
+        options.add_argument("--headless=new")  # включаем headless режим (без графического интерфейса)
+        os.system(
+            "Xvfb :99 -screen 0 1920x1080x24 > /dev/null 2>&1 &")  # Запускаем витуальный Х11-сервер (эмулятор дисплея)
+        os.environ["DISPLAY"] = ":99"  # Устанавливаем переменную окружения для виртуального дисплея
+
+    # Настройка для Windows (обычный режим с графическим интерфейсом)
+    else:
+        options.add_argument("start-maximized")  # аргумент для запуска браузера в режиме максимального окна.
+        options.add_argument("--disable-notifications")  # Отключаются уведомления в браузере.
+        options.add_argument("—disable-popup-blocking")  # Отключается блокировка всплывающих окон
+
+    # Автоматически скачиваем и устанавливаем подходящий ChromeDriver
+    # ChromeDriverManager().install() - загружает нужную версию драйвера
+    # Исправленная инициализация драйвера:
+    service = Service(ChromeDriverManager().install())
+    env_settings.driver_chrome = webdriver.Chrome(service=service, options=options)
+    #env_settings.driver_chrome = webdriver.Chrome(options=options)
     env_settings.driver_wait_short = WebDriverWait(env_settings.driver_chrome, env_settings.SHORT_TIME_WAIT)
     log(f'webdriver для Chrome добавлен в env_settings.driver_chrome')
 
@@ -61,7 +72,7 @@ def close_browser():
 
 
 def set_story(cls, method):
-    log(f'епта новый метод {cls}, {method}')
+    log(f'новый метод {cls}, {method}')
     try:
         env_settings.stash['STORY'] = [el.args[0] for el in method.pytestmark if "story" in str(el)]
         log(f'STORY: {env_settings.stash['STORY'][0]}')
