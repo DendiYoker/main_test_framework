@@ -3,6 +3,8 @@ name: CI/CD Pipeline
 on:
   push:
     branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]  # Для тестов в PR
 
 jobs:
   test-and-deploy:

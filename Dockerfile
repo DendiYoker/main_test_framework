@@ -20,3 +20,5 @@ COPY . .
 
 # Команда запуска (headless-режим + pytest)
 CMD ["sh", "-c", "Xvfb :99 -screen 0 1920x1080x24 > /dev/null 2>&1 & export DISPLAY=:99 && pytest -v"]
+
+# что то
