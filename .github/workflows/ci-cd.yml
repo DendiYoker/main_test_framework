@@ -2,39 +2,55 @@ name: CI/CD Pipeline
 
 on:
   push:
-    branches: [ "master" ]  # Триггер на мерж в master
+    branches: [ "master" ]
 
 jobs:
   test-and-deploy:
-    runs-on: ubuntu-latest   # Используем последний Ubuntu
-    timeout-minutes: 30      # Максимальное время выполнения
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
 
     steps:
       # Шаг 1: Клонирование кода
       - name: Checkout code
-        uses: actions/checkout@v4  # Версия действия для клонирования
+        uses: actions/checkout@v4
 
-      # Шаг 2: Установка зависимостей и запуск тестов
+      # Шаг 2: Установка версии Python
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+            python-version: '3.12'
+
+      # Шаг 3: Установка зависимостей
+      - name: Install dependencies
+        run: |
+            sudo apt-get update
+            sudo apt-get install -y xvfb
+            pip install -r requirements.txt
+
+      # Шаг 4: Запуск тестов
       - name: Run tests
         run: |
-          pip install -r requirements.txt  # Установка зависимостей
-          pytest -v test_scenarios/ --junitxml=test-results.xml  # Запуск тестов
-        # Или укажите конкретный файл:
-        # pytest -v tests/test_example.py
+            Xvfb :99 -screen 0 1920x1080x24 > /dev/null 2>&1 &
+            export DISPLAY=:99
+            pytest -v test_scenarios/ --junitxml=test-results.xml
 
-      # Шаг 3: Сборка Docker-образа
+      # Шаг 5: Сборка Docker-образа (локально на GitHub Runner)
       - name: Build Docker image
-        run: docker build -t test-runner .  # Сборка образа
+        run: docker build -t test-runner .
 
-      # Шаг 4: Деплой на сервер через SSH
+      # Шаг 6: Деплой на сервер через SSH
       - name: Deploy to VM
-        uses: appleboy/ssh-action@v1.0.0  # Действие для SSH
+        uses: appleboy/ssh-action@v1.0.0
         with:
-          host: ${{ secrets.VM_HOST }}      # IP сервера из секретов
-          username: ${{ secrets.VM_USERNAME }}  # Пользователь SSH
-          key: ${{ secrets.VM_SSH_KEY }}    # Приватный ключ
-          script: |  # Команды для выполнения на сервере
-            cd /opt/automation
-            git pull origin master
-            docker-compose down
-            docker-compose up -d --build
+          host: ${{ secrets.VM_HOST }}
+          username: ${{ secrets.VM_USERNAME }}
+          key: ${{ secrets.VM_SSH_KEY }}
+          script: |
+            # Копируем Docker-образ с Runner на сервер
+            docker save test-runner > runner-image.tar
+            scp runner-image.tar ${{ secrets.VM_USERNAME }}@${{ secrets.VM_HOST }}:/tmp/
+            ssh ${{ secrets.VM_USERNAME }}@${{ secrets.VM_HOST }} "
+            docker load -i /tmp/runner-image.tar && \
+            cd /opt/automation && \
+            docker-compose down && \
+            docker-compose up -d
