@@ -38,31 +38,31 @@ def clear_reports_dir():
 
 
 def set_browser():
-    options = Options()
+    chrome_options = Options()
 
-    # Настройка для Linux (без GUI)
-    if platform.system() == 'Linux':
-        options.add_argument("--no-sandbox")  # отключаем sanbox, необходимо для работы Docker CI
-        options.add_argument("--disable-dev-shm-usage")  # отключаем shared memory (решает проблемы в Linux)
-        options.add_argument("--headless=new")  # включаем headless режим (без графического интерфейса)
-        os.system(
-            "Xvfb :99 -screen 0 1920x1080x24 > /dev/null 2>&1 &")  # Запускаем витуальный Х11-сервер (эмулятор дисплея)
-        os.environ["DISPLAY"] = ":99"  # Устанавливаем переменную окружения для виртуального дисплея
+    # Если запускаем в CI (GitHub Actions), используем headless режим
+    if is_running_in_ci():
+        chrome_options.add_argument("--headless")  # без графического интерфейса
+        chrome_options.add_argument("--no-sandbox")  # обязательно для CI
+        chrome_options.add_argument("--disable-dev-shm-usage")  # для ограниченной памяти в CI
+        chrome_options.add_argument("--window-size=1920,1080")
 
-    # Настройка для Windows (обычный режим с графическим интерфейсом)
-    else:
-        options.add_argument("start-maximized")  # аргумент для запуска браузера в режиме максимального окна.
-        options.add_argument("--disable-notifications")  # Отключаются уведомления в браузере.
-        options.add_argument("—disable-popup-blocking")  # Отключается блокировка всплывающих окон
+    env_settings.driver_chrome = webdriver.Chrome(options=chrome_options)
 
-    # Автоматически скачиваем и устанавливаем подходящий ChromeDriver
-    # ChromeDriverManager().install() - загружает нужную версию драйвера
-    # Исправленная инициализация драйвера:
-    service = Service(ChromeDriverManager().install())
-    env_settings.driver_chrome = webdriver.Chrome(service=service, options=options)
-    #env_settings.driver_chrome = webdriver.Chrome(options=options)
-    env_settings.driver_wait_short = WebDriverWait(env_settings.driver_chrome, env_settings.SHORT_TIME_WAIT)
-    log(f'webdriver для Chrome добавлен в env_settings.driver_chrome')
+    # Даем браузеру время на инициализацию
+    env_settings.driver_chrome.implicitly_wait(10)
+
+    yield env_settings.driver_chrome
+
+    # Закрываем браузер после теста
+    env_settings.driver_chrome.quit()
+
+
+
+def is_running_in_ci():
+    """Проверяем, запущены ли мы в CI среде"""
+    import os
+    return os.getenv('CI') == 'true' or os.getenv('GITHUB_ACTIONS') == 'true'
 
 
 def close_browser():

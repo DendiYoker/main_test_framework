@@ -2,7 +2,8 @@ import pytest
 import configparser
 from core import env_settings
 from core.logging import log
-from core.setup_test_env import set_logger, clear_reports_dir
+from core.setup_test_env import set_logger, clear_reports_dir, set_browser
+
 
 def pytest_addoption(parser):
     parser.addoption('--stand', action="store", default="PSI", help="Укажите стенд: PSI/ PREDPROM")
@@ -33,7 +34,7 @@ def start_set_up():
     в таком варианте создается одна сессия, и браузер в итоге если закрыть нужно переоткрывать в
      методе get start_session({}) а в этом случае окно открываетя не на всю ширину ES.driver_chrome.start_session({})
     """
-    # set_browser()
+    set_browser()
     # yield
     # close_browser()
 
