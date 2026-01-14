@@ -47,7 +47,9 @@ def set_browser():
         chrome_options.add_argument("--disable-dev-shm-usage")  # для ограниченной памяти в CI
         chrome_options.add_argument("--window-size=1920,1080")
 
-    env_settings.driver_chrome = webdriver.Chrome(options=chrome_options)
+    # Автоматически скачиваем и используем правильный ChromeDriver
+    service = Service(ChromeDriverManager().install())
+    env_settings.driver_chrome = webdriver.Chrome(service=service, options=chrome_options)
 
     # Даем браузеру время на инициализацию
     env_settings.driver_chrome.implicitly_wait(10)
@@ -75,12 +77,12 @@ def set_story(cls, method):
     log(f'новый метод {cls}, {method}')
     try:
         env_settings.stash['STORY'] = [el.args[0] for el in method.pytestmark if "story" in str(el)]
-        log(f'STORY: {env_settings.stash['STORY'][0]}')
+        log(f"STORY: {env_settings.stash['STORY'][0]}")
         env_settings.stash['FEATURE'] = [el.args[0] for el in method.pytestmark if "feature" in str(el)]
-        log(f'FEATURE: {env_settings.stash['FEATURE'][0]}')
+        log(f"FEATURE: {env_settings.stash['FEATURE'][0]}")
     except IndexError:
         try:
             env_settings.stash['FEATURE'] = [el.args[0] for el in cls.pytestmark if "feature" in str(el)]
-            log(f'FEATURE: {env_settings.stash['FEATURE'][0]}')
+            log(f"FEATURE: {env_settings.stash['FEATURE'][0]}")
         except AttributeError:
             log(f'FEATURE не определена')
