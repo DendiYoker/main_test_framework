@@ -4,7 +4,7 @@ import allure
 import datetime
 
 from core.page_factory import PageFactory
-from core import env_settings
+from core import config
 from core.logging import log
 
 

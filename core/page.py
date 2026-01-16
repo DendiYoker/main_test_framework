@@ -1,4 +1,4 @@
-from core import env_settings
+from core import config
 
 
 class Page:

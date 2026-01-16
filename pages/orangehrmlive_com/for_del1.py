@@ -1,6 +1,6 @@
 from pages.base_page import WebBasePage
 from core.core_fixtures import init
-from core import env_settings
+from core import config
 
 
 @init

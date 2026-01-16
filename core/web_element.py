@@ -2,7 +2,7 @@ from selenium.common import TimeoutException
 from selenium.webdriver import Keys, ActionChains
 from selenium.webdriver.support import expected_conditions as EC
 
-from core import env_settings as ES
+from core import config as ES
 from core.logging import log
 
 

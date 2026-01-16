@@ -1,7 +1,7 @@
 import allure
 import datetime
 
-from core import env_settings
+from core import config
 from core.logging import log
 
 from pages import __all__

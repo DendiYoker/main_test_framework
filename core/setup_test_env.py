@@ -3,7 +3,7 @@ import pathlib
 import logging
 import platform
 
-from core import env_settings
+from core.config import TestConfig
 from core.logging import log
 
 from selenium import webdriver
@@ -13,30 +13,23 @@ from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.chrome.service import Service
 
 
-def set_logger():
-    """
-    Функция добавляет logger в environment_settings.logger
-    """
-    logger = logging.getLogger("logger_info")
-    logger.setLevel(logging.INFO)
-    # обработчик добавляется каждый раз, когда вызывается извне поэтому удаляем все потоки
-    logger.handlers.clear()
-    handler = logging.StreamHandler()
-    formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
-    handler.setFormatter(formatter)
-    logger.addHandler(handler)
-    env_settings.logger = logger
+# ==================== НАЗВАНИЕ НЕ ПРИДУМАЛ ====================
 
+def set_story(cls, method):
+    log(f'новый метод {cls}, {method}')
+    try:
+        TestConfig.stash['STORY'] = [el.args[0] for el in method.pytestmark if "story" in str(el)]
+        log(f"STORY: {TestConfig.stash['STORY'][0]}")
+        TestConfig.stash['FEATURE'] = [el.args[0] for el in method.pytestmark if "feature" in str(el)]
+        log(f"FEATURE: {TestConfig.stash['FEATURE'][0]}")
+    except IndexError:
+        try:
+            TestConfig.stash['FEATURE'] = [el.args[0] for el in cls.pytestmark if "feature" in str(el)]
+            log(f"FEATURE: {TestConfig.stash['FEATURE'][0]}")
+        except AttributeError:
+            log(f'FEATURE не определена')
 
-def clear_reports_dir():
-    # ToDo Вынести путь к папке с отчетам в config.ini или считаывать его из входящих парамтеров
-    path_reports_dir = pathlib.Path.cwd() / 'reports'
-    all_files_reports = list(map(str, path_reports_dir.glob('*.*')))
-    for i in all_files_reports:
-        pathlib.Path(i).unlink()
-    log(f'Папка с отчетами allure {path_reports_dir} очищена, удалено {len(all_files_reports)} файла/(ов)')
-
-
+# ==================== НАСТРОЙКА БРАУЗЕРА ====================
 def set_browser():
     chrome_options = Options()
 
@@ -49,40 +42,53 @@ def set_browser():
 
     # Автоматически скачиваем и используем правильный ChromeDriver
     service = Service(ChromeDriverManager().install())
-    env_settings.driver_chrome = webdriver.Chrome(service=service, options=chrome_options)
+    TestConfig.driver = webdriver.Chrome(service=service, options=chrome_options)
 
     # Даем браузеру время на инициализацию
-    env_settings.driver_chrome.implicitly_wait(10)
+    TestConfig.driver.implicitly_wait(10)
 
-    yield env_settings.driver_chrome
+    yield TestConfig.driver
 
     # Закрываем браузер после теста
-    env_settings.driver_chrome.quit()
-
-
-
-def is_running_in_ci():
-    """Проверяем, запущены ли мы в CI среде"""
-    import os
-    return os.getenv('CI') == 'true' or os.getenv('GITHUB_ACTIONS') == 'true'
-
+    TestConfig.driver.quit()
 
 def close_browser():
-    if env_settings.driver_chrome is not None:
-        env_settings.driver_chrome.quit()
+    if TestConfig.driver is not None:
+        TestConfig.driver.quit()
     log(f'Драйвер браузера закрыт')
 
+# ==================== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ====================
+def is_running_in_ci():
+    """Проверяем, запущены ли мы в CI среде"""
+    return os.getenv('CI') == 'true' or os.getenv('GITHUB_ACTIONS') == 'true'
 
-def set_story(cls, method):
-    log(f'новый метод {cls}, {method}')
-    try:
-        env_settings.stash['STORY'] = [el.args[0] for el in method.pytestmark if "story" in str(el)]
-        log(f"STORY: {env_settings.stash['STORY'][0]}")
-        env_settings.stash['FEATURE'] = [el.args[0] for el in method.pytestmark if "feature" in str(el)]
-        log(f"FEATURE: {env_settings.stash['FEATURE'][0]}")
-    except IndexError:
-        try:
-            env_settings.stash['FEATURE'] = [el.args[0] for el in cls.pytestmark if "feature" in str(el)]
-            log(f"FEATURE: {env_settings.stash['FEATURE'][0]}")
-        except AttributeError:
-            log(f'FEATURE не определена')
+def clear_reports_dir():
+    """Очистка директории с отчетами (только локально)"""
+    if not is_running_in_ci():
+        import shutil
+        reports_dir = "allure-results"
+        if os.path.exists(reports_dir):
+            shutil.rmtree(reports_dir)
+        os.makedirs(reports_dir, exist_ok=True)
+        log(f'Папка с отчетами allure {reports_dir} очищена')
+
+    # path_reports_dir = pathlib.Path.cwd() / 'reports'
+    # all_files_reports = list(map(str, path_reports_dir.glob('*.*')))
+    # for i in all_files_reports:
+    #     pathlib.Path(i).unlink()
+    # log(f'Папка с отчетами allure {path_reports_dir} очищена, удалено {len(all_files_reports)} файла/(ов)')
+
+def setup_logger():
+    """
+    Функция добавляет logger в environment_settings.logger
+    """
+    logger = logging.getLogger("logger_info")
+    logger.setLevel(logging.INFO)
+    # обработчик добавляется каждый раз, когда вызывается извне поэтому удаляем все потоки
+    logger.handlers.clear()
+    handler = logging.StreamHandler()
+    formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
+    TestConfig.logger = logger
+    return logger
