@@ -1,0 +1,5 @@
+2024-01-15 10:30:15 INFO - Starting test
+            2024-01-15 10:30:16 DEBUG - Opening browser
+            2024-01-15 10:30:17 INFO - Navigating to URL
+            2024-01-15 10:30:20 WARNING - Slow response detected
+            2024-01-15 10:30:22 INFO - Test completed
