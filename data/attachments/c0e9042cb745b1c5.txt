@@ -1,2 +1,0 @@
-2026-01-17 22:05:21,950 - INFO - Starting test session at 2026-01-17 22:05:21.950608
-2026-01-17 22:05:21,951 - INFO - добавлены настройки по стенду: {'url': "'url psi'", 'bd': "{'host':'testhosts', 'database':'TEST', 'user': 'testov','pwd':'3333'}"} из config.ini, в env_settings.stand_settings 
