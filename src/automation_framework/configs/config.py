@@ -1,14 +1,15 @@
 from typing import Optional
 from dataclasses import dataclass, field
+
+import pytest
 from selenium import webdriver
 import sys
 
-from core.page_factory import PageFactory
-
+from automation_framework.core.page_factory import PageFactory
 
 @dataclass
-class TestConfig:
-    """Конфигурация тестового окружения"""
+class ConfigurationTest:
+    """Конфигурация для всей сессии тестов"""
     driver: Optional[webdriver.Chrome] = None
     browser_version: str = "latest"
     window_size: tuple = (1920, 1080)
@@ -23,4 +24,4 @@ class TestConfig:
 
 
 # Синглтон конфига (можно заменить на фикстуру позже)
-config = TestConfig()
+config = ConfigurationTest()

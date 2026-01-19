@@ -1,9 +1,8 @@
 from selenium.common import TimeoutException
-from selenium.webdriver import Keys, ActionChains
 from selenium.webdriver.support import expected_conditions as EC
 
-from core import config as ES
-from core.logging import log
+from automation_framework.configs import config as ES
+from automation_framework.core.logging import log
 
 
 class WebElementHelper:

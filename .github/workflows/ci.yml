@@ -27,13 +27,20 @@ jobs:
       uses: actions/cache@v4
       with:
         path: ~/.cache/pip
-        key: ${{ runner.os }}-python-${{ hashFiles('requirements.txt') }}
+        key: ${{ runner.os }}-python-${{ hashFiles('pyproject.toml') }}
+        # key: ${{ runner.os }}-python-${{ hashFiles('requirements.txt') }
 
     # 4. Устанавливаем зависимости из requirements.txt
     - name: Install dependencies
       run: |
         pip install --upgrade pip
-        pip install -r requirements.txt
+        pip install .[dev] # Работает с pyproject.toml
+
+    # 4.1. Проверка кода линтером
+    - name: Lint with flake8
+      run: |
+        pip install flake8
+        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
 
     # 5. Устанавливаем Chrome (браузер для Selenium)
     - name: Install Chrome
@@ -49,6 +56,14 @@ jobs:
         
         echo "✅ Chrome установлен:"
         google-chrome --version
+
+    # 5.1. Кешируем Chrome
+#    - name: Cache Chrome
+#      uses: actions/cache@v4
+#      with:
+#        path: ~/.cache/google-chrome
+#        key: ${{ runner.os }}-chrome-${{ hashFiles('**/apt-get') }}
+
 
     # 6. Запускаем тесты и собираем данные для Allure
     - name: Run tests and collect Allure data

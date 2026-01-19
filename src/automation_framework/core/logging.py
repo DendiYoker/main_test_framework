@@ -1,9 +1,8 @@
-import logging
 import allure
 from allure import attachment_type as at
 import json
-from core.tools import current_time
-from core.config import TestConfig
+from automation_framework.core.tools import current_time
+from automation_framework.configs.config import ConfigurationTest
 
 
 def log(message, attach='attachment'):
@@ -37,4 +36,4 @@ def log(message, attach='attachment'):
     allure.attach(name=f'{current_time()}: {message}',
                   body=attach,
                   attachment_type=attach_type)
-    TestConfig.logger.info(f"{message}" if attach == 'attachment' else f"{message}: {attach}")
+    ConfigurationTest.logger.info(f"{message}" if attach == 'attachment' else f"{message}: {attach}")

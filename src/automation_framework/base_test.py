@@ -1,14 +1,11 @@
 import allure
 import datetime
 
-from core import config
-from core.logging import log
+from automation_framework.core.logging import log
+from automation_framework.configs.config import ConfigurationTest
+from automation_framework.pages import __all__
+from automation_framework.core.setup_test_env import set_browser, close_browser, set_story
 
-from pages import __all__
-from core.setup_test_env import set_browser, close_browser, set_story
-
-
-#__tracebackhide__ = True
 
 class BaseTest(object):
 
@@ -18,12 +15,12 @@ class BaseTest(object):
             len(__all__)  #init all pages
             log(f'setup metod: {method.__name__}')
             set_browser()
-            set_story(cls, method)
+            # set_story(cls, method)
 
 
     @staticmethod
     def set_page(page_name):
-        env_settings.PF.set_current_page(page_name)
+        ConfigurationTest.PF.set_current_page(page_name)
 
     @staticmethod
     def run_step(step, *args):
@@ -31,7 +28,7 @@ class BaseTest(object):
         start = datetime.datetime.now().replace(microsecond=0)
         with allure.step(step):
             try:
-                env_settings.PF.run_action(step, *args)
+                ConfigurationTest.PF.run_action(step, *args)
                 end = datetime.datetime.now().replace(microsecond=0)
                 log(f'шаг отработал за {end - start} секунд')
             except:

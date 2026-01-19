@@ -1,14 +1,11 @@
 import os
-import pathlib
 import logging
-import platform
 
-from core.config import TestConfig
-from core.logging import log
+from automation_framework.configs.config import ConfigurationTest
+from src.automation_framework.core.logging import log
 
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.support.wait import WebDriverWait
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.chrome.service import Service
 
@@ -18,14 +15,14 @@ from selenium.webdriver.chrome.service import Service
 def set_story(cls, method):
     log(f'новый метод {cls}, {method}')
     try:
-        TestConfig.stash['STORY'] = [el.args[0] for el in method.pytestmark if "story" in str(el)]
-        log(f"STORY: {TestConfig.stash['STORY'][0]}")
-        TestConfig.stash['FEATURE'] = [el.args[0] for el in method.pytestmark if "feature" in str(el)]
-        log(f"FEATURE: {TestConfig.stash['FEATURE'][0]}")
+        ConfigurationTest.stash['STORY'] = [el.args[0] for el in method.pytestmark if "story" in str(el)]
+        log(f"STORY: {ConfigurationTest.stash['STORY'][0]}")
+        ConfigurationTest.stash['FEATURE'] = [el.args[0] for el in method.pytestmark if "feature" in str(el)]
+        log(f"FEATURE: {ConfigurationTest.stash['FEATURE'][0]}")
     except IndexError:
         try:
-            TestConfig.stash['FEATURE'] = [el.args[0] for el in cls.pytestmark if "feature" in str(el)]
-            log(f"FEATURE: {TestConfig.stash['FEATURE'][0]}")
+            ConfigurationTest.stash['FEATURE'] = [el.args[0] for el in cls.pytestmark if "feature" in str(el)]
+            log(f"FEATURE: {ConfigurationTest.stash['FEATURE'][0]}")
         except AttributeError:
             log(f'FEATURE не определена')
 
@@ -42,19 +39,19 @@ def set_browser():
 
     # Автоматически скачиваем и используем правильный ChromeDriver
     service = Service(ChromeDriverManager().install())
-    TestConfig.driver = webdriver.Chrome(service=service, options=chrome_options)
+    ConfigurationTest.driver = webdriver.Chrome(service=service, options=chrome_options)
 
     # Даем браузеру время на инициализацию
-    TestConfig.driver.implicitly_wait(10)
+    ConfigurationTest.driver.implicitly_wait(10)
 
-    yield TestConfig.driver
+    yield ConfigurationTest.driver
 
     # Закрываем браузер после теста
-    TestConfig.driver.quit()
+    ConfigurationTest.driver.quit()
 
 def close_browser():
-    if TestConfig.driver is not None:
-        TestConfig.driver.quit()
+    if ConfigurationTest.driver is not None:
+        ConfigurationTest.driver.quit()
     log(f'Драйвер браузера закрыт')
 
 # ==================== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ====================
@@ -90,5 +87,5 @@ def setup_logger():
     formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
     handler.setFormatter(formatter)
     logger.addHandler(handler)
-    TestConfig.logger = logger
+    ConfigurationTest.logger = logger
     return logger

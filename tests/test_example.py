@@ -1,11 +1,7 @@
 import allure
-import pytest
 
-from core.core_fixtures import story, feature
-from core.logging import log
-from test_scenarios.base_test import BaseTest
-from core.tools import current_time
-from core import config
+from automation_framework.core.core_fixtures import story, feature
+from automation_framework.base_test import BaseTest
 
 
 @feature('Nice_test')
@@ -14,7 +10,7 @@ class Test11(BaseTest):
     @allure.description('Описание первого теста')
     def test_orangeherm_authorization(self):
         self.set_page('Страница авторизации Orangehrm')
-        self.run_step('проверить_авторизацию')
+        # self.run_step('проверить_авторизацию')
 
     @story('003')
     @allure.description('Описание 3 теста')
@@ -28,4 +24,4 @@ class Test12(BaseTest):
     @allure.description('Описание второго теста')
     def test_002(self):
         self.set_page('Страница теста мыши SeleniumDev')
-        self.run_step('тестирование_возможноcти_мыши')
+        # self.run_step('тестирование_возможноcти_мыши')

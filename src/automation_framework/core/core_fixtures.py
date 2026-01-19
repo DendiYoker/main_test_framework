@@ -1,11 +1,7 @@
-import time
-import pytest
 import allure
-import datetime
 
-from core.page_factory import PageFactory
-from core import config
-from core.logging import log
+from automation_framework.core.page_factory import PageFactory
+from automation_framework.configs.config import ConfigurationTest
 
 
 def story(number_story):
@@ -15,7 +11,7 @@ def story(number_story):
     :return: allure.story(number_story)
     """
     #ToDo перезаписыавет стори проходясь по всем
-    env_settings.stash["STORY"] = number_story
+    # ConfigurationTest.stash["STORY"] = number_story
     return allure.story(number_story)
 
 
@@ -25,7 +21,7 @@ def feature(number_feature):
         :param number_feature:
         :return: allure.feature(number_feature)
     """
-    env_settings.stash["FEATURE"] = number_feature
+    # ConfigurationTest.stash["FEATURE"] = number_feature
     return allure.feature(number_feature)
 
 
@@ -35,6 +31,6 @@ def init(page):
     :param page: класс страницы
     :return:
     """
-    if env_settings.PF is None:
-        env_settings.PF = PageFactory()
+    if ConfigurationTest.PF is None:
+        ConfigurationTest.PF = PageFactory()
     page()

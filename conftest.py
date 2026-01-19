@@ -1,12 +1,10 @@
-import allure
 import pytest
-import os
 import configparser
 from datetime import datetime
 
-from core.config import TestConfig
-from core.logging import log
-from core.setup_test_env import setup_logger, clear_reports_dir, set_browser
+from automation_framework.configs.config import ConfigurationTest
+from src.automation_framework.core.logging import log
+from src.automation_framework.core.setup_test_env import setup_logger, clear_reports_dir, set_browser
 
 
 def pytest_addoption(parser):
@@ -23,11 +21,11 @@ def config_parser_fix(args_stand):
     """
     Парсинг файла config.ini
     """
-    TestConfig.STAND = args_stand  # set the stand from the incoming parameters
+    ConfigurationTest.STAND = args_stand  # set the stand from the incoming parameters
     t = configparser.ConfigParser()
     t.read('config.ini')
-    TestConfig.stand_settings = dict(t[args_stand])
-    log(f'добавлены настройки по стенду: {TestConfig.stand_settings} из config.ini, в env_settings.stand_settings ')
+    ConfigurationTest.stand_settings = dict(t[args_stand])
+    log(f'добавлены настройки по стенду: {ConfigurationTest.stand_settings} из config.ini, в env_settings.stand_settings ')
 
 
 @pytest.fixture(autouse=True, scope="session")
