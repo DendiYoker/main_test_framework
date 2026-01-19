@@ -1,0 +1,4 @@
+INFO     logger_info:logging.py:39 добавлены настройки по стенду: {'url': "'url psi'", 'bd': "{'host':'testhosts', 'database':'TEST', 'user': 'testov','pwd':'3333'}"} из config.ini, в env_settings.stand_settings 
+INFO     logger_info:logging.py:39 setup metod: test_002
+INFO     logger_info:logging.py:39 teardown_method запущен
+INFO     logger_info:logging.py:39 Драйвер браузера закрыт

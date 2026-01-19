@@ -1,0 +1,2 @@
+INFO     logger_info:logging.py:39 Starting test session at 2026-01-19 21:29:20.911611
+INFO     logger_info:logging.py:39 добавлены настройки по стенду: {'url': "'url psi'", 'bd': "{'host':'testhosts', 'database':'TEST', 'user': 'testov','pwd':'3333'}"} из config.ini, в env_settings.stand_settings
