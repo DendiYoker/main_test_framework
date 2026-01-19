@@ -1,11 +1,9 @@
-import time
+from automation_framework.pages.base_page import WebBasePage
+from automation_framework.core.core_fixtures import init
+from automation_framework.core.logging import log
 
-from pages.base_page import WebBasePage
-from core.core_fixtures import init
-from core.logging import log
-
-from locators.orangehrm import Orangehrm
-from locators.selenium_dev import SeleniumDev
+from automation_framework.locators.orangehrm import Orangehrm
+from automation_framework.locators.selenium_dev import SeleniumDev
 
 
 @init

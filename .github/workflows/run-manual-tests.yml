@@ -1,0 +1,251 @@
+name: 🚀 Run Custom Tests with Parameters
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Ветка для запуска тестов'
+        required: true
+        default: 'master'
+        type: string
+
+      test_type:
+        description: 'Тип фильтрации тестов'
+        required: true
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - story
+          - feature
+          - severity
+          - pytest_mark
+          - file_path
+
+      story_name:
+        description: 'Название .story (например: "Успешный тест")'
+        required: false
+        type: string
+        default: ''
+        # Показывать только если test_type == 'story'
+        if: inputs.test_type == 'story'
+
+      feature_name:
+        description: 'Название feature (например: "Базовые возможности")'
+        required: false
+        type: string
+        default: ''
+        if: inputs.test_type == 'feature'
+
+      severity_level:
+        description: 'Уровень важности теста'
+        required: false
+        type: choice
+        options:
+          - blocker
+          - critical
+          - normal
+          - minor
+          - trivial
+        default: 'normal'
+        if: inputs.test_type == 'severity'
+
+      pytest_marker:
+        description: 'Pytest маркер (например: "smoke" или "regression")'
+        required: false
+        type: string
+        default: ''
+        if: inputs.test_type == 'pytest_mark'
+
+      test_path:
+        description: 'Путь к тесту (например: tests/login/test_auth.py)'
+        required: false
+        type: string
+        default: 'tests/'
+        if: inputs.test_type == 'file_path'
+
+#      parallel_execution:
+#        description: 'Запускать тесты параллельно?'
+#        required: false
+#        type: boolean
+#        default: false
+
+jobs:
+  run-custom-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+    # 1. Проверяем выбранную ветку
+    - name: Checkout ${{ inputs.branch }} branch
+      uses: actions/checkout@v4
+      with:
+        ref: ${{ inputs.branch }}
+        fetch-depth: 0
+
+    # 2. Настраиваем Python
+    - name: Setup Python 3.13
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.13'
+
+    # 3. Кешируем зависимости
+    - name: Cache dependencies
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-python-${{ inputs.branch }}-${{ hashFiles('pyproject.toml') }}
+
+    # 4. Устанавливаем зависимости
+    - name: Install dependencies
+      run: |
+        pip install --upgrade pip
+        pip install .[dev]
+
+    # 5. Устанавливаем Chrome
+    - name: Install Chrome for Selenium
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y wget
+        wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
+        echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" | sudo tee /etc/apt/sources.list.d/google-chrome.list
+        sudo apt-get update
+        sudo apt-get install -y google-chrome-stable
+        echo "✅ Chrome установлен:"
+        google-chrome --version
+
+    # 6. Формируем команду для запуска тестов
+    - name: Prepare test command
+      id: test_command
+      run: |
+        # Базовая команда
+        CMD="pytest -v --alluredir=allure-results"
+        
+#        # Добавляем параллельный запуск если выбран
+#        if ${{ inputs.parallel_execution }}; then
+#          CMD="$CMD -n auto"
+#        fi
+        
+        # Выбираем тип фильтрации
+        case "${{ inputs.test_type }}" in
+          "story")
+            if [ -n "${{ inputs.story_name }}" ]; then
+              CMD="$CMD --allure-stories='${{ inputs.story_name }}'"
+            fi
+            ;;
+          "feature")
+            if [ -n "${{ inputs.feature_name }}" ]; then
+              CMD="$CMD --allure-features='${{ inputs.feature_name }}'"
+            fi
+            ;;
+          "severity")
+            CMD="$CMD --allure-severities='${{ inputs.severity_level }}'"
+            ;;
+          "pytest_mark")
+            if [ -n "${{ inputs.pytest_marker }}" ]; then
+              CMD="$CMD -m '${{ inputs.pytest_marker }}'"
+            fi
+            ;;
+          "file_path")
+            CMD="$CMD '${{ inputs.test_path }}'"
+            ;;
+          "all")
+            # Запускаем все тесты
+            CMD="$CMD tests/"
+            ;;
+        esac
+        
+        # Выводим команду
+        echo "🔧 Сформирована команда: $CMD"
+        echo "command=$CMD" >> $GITHUB_OUTPUT
+
+    # 7. Запускаем тесты
+    - name: Run selected tests
+      run: |
+        mkdir -p allure-results
+        echo "🎯 Запуск тестов из ветки: ${{ inputs.branch }}"
+        echo "📊 Тип фильтрации: ${{ inputs.test_type }}"
+        
+        # Показываем детали в зависимости от типа
+        if [[ "${{ inputs.test_type }}" == "story" && -n "${{ inputs.story_name }}" ]]; then
+          echo "📖 Story: ${{ inputs.story_name }}"
+        fi
+        
+        if [[ "${{ inputs.test_type }}" == "feature" && -n "${{ inputs.feature_name }}" ]]; then
+          echo "🏷️ Feature: ${{ inputs.feature_name }}"
+        fi
+        
+        if [[ "${{ inputs.test_type }}" == "severity" ]]; then
+          echo "⚠️ Severity: ${{ inputs.severity_level }}"
+        fi
+        
+        # Выполняем команду
+        ${{ steps.test_command.outputs.command }}
+
+    # 8. Генерируем отчет Allure
+    - name: Generate Allure report
+      if: always()
+      run: |
+        ALLURE_VERSION=2.29.0
+        curl -o allure-$ALLURE_VERSION.tgz -Ls https://github.com/allure-framework/allure2/releases/download/$ALLURE_VERSION/allure-$ALLURE_VERSION.tgz
+        tar -zxvf allure-$ALLURE_VERSION.tgz -C /opt/
+        sudo ln -s /opt/allure-$ALLURE_VERSION/bin/allure /usr/bin/allure
+        
+        # Создаем уникальное имя для отчета
+        TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+        BRANCH_SLUG=$(echo "${{ inputs.branch }}" | sed 's/[^a-zA-Z0-9]/_/g')
+        REPORT_NAME="allure-report-${BRANCH_SLUG}-${TIMESTAMP}"
+        
+        allure generate allure-results -o $REPORT_NAME --clean
+        echo "📊 Allure отчет: $REPORT_NAME"
+        echo "report_name=$REPORT_NAME" >> $GITHUB_OUTPUT
+
+    # 9. Сохраняем отчет как артефакт
+    - name: Upload Allure report as artifact
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: allure-report-${{ github.run_id }}
+        path: ${{ steps.generate_report.outputs.report_name }}
+        retention-days: 14
+
+    # 10. Опционально: деплой на GitHub Pages в отдельную папку
+    - name: Deploy to GitHub Pages (separate folder)
+      if: always()
+      uses: peaceiris/actions-gh-pages@v4
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./${{ steps.generate_report.outputs.report_name }}
+        destination_dir: ./manual-runs/${{ github.run_id }}
+        keep_files: false
+
+    # 11. Выводим итоговую информацию
+    - name: Display results summary
+      if: always()
+      run: |
+        echo ""
+        echo "================================================"
+        echo "🚀 РУЧНОЙ ЗАПУСК ТЕСТОВ ЗАВЕРШЕН"
+        echo "================================================"
+        echo ""
+        echo "📋 ПАРАМЕТРЫ ЗАПУСКА:"
+        echo "   🌿 Ветка: ${{ inputs.branch }}"
+        echo "   🎯 Тип фильтрации: ${{ inputs.test_type }}"
+        
+        if [[ "${{ inputs.test_type }}" == "story" && -n "${{ inputs.story_name }}" ]]; then
+          echo "   📖 Story: ${{ inputs.story_name }}"
+        fi
+        
+        if [[ "${{ inputs.test_type }}" == "feature" && -n "${{ inputs.feature_name }}" ]]; then
+          echo "   🏷️ Feature: ${{ inputs.feature_name }}"
+        fi
+        
+        echo ""
+        echo "📊 РЕЗУЛЬТАТЫ:"
+        echo "   📁 Отчет сохранен как артефакт: allure-report-${{ github.run_id }}"
+        echo "   🌐 Онлайн отчет: https://dendiyoker.github.io/main_test_framework/manual-runs/${{ github.run_id }}/"
+        echo ""
+        echo "🔗 ССЫЛКИ:"
+        echo "   📈 Детали запуска: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+        echo "   📦 Все артефакты: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts"
+        echo ""
+        echo "================================================"

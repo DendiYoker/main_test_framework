@@ -1,0 +1,138 @@
+name: CI - Run Tests with Allure Reports
+
+# Когда запускать: при любом push или pull request в master
+on:
+  push:
+    branches: [ '**' ] # ** - любая ветка (feature/*, hotfix/*, test-* и т.д.)
+  pull_request:
+    branches: [ master ]  # при PR только в master
+
+jobs:
+  test:
+    runs-on: ubuntu-latest  # GitHub предоставляет виртуальную машину
+
+    steps:
+    # 1. Получаем код из репозитория
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    # 2. Устанавливаем Python
+    - name: Setup Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.13'
+
+    # 3. Кешируем зависимости
+    - name: Cache dependencies
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-python-${{ hashFiles('pyproject.toml') }}
+        # key: ${{ runner.os }}-python-${{ hashFiles('requirements.txt') }
+
+    # 4. Устанавливаем зависимости из requirements.txt
+    - name: Install dependencies
+      run: |
+        pip install --upgrade pip
+        pip install .[dev] # Работает с pyproject.toml
+
+    # 4.1. Проверка кода линтером
+    - name: Lint with flake8
+      run: |
+        pip install flake8
+        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+
+    # 5. Устанавливаем Chrome (браузер для Selenium)
+    - name: Install Chrome
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y wget
+        
+        # Устанавливаем последний стабильный Chrome
+        wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
+        echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" | sudo tee /etc/apt/sources.list.d/google-chrome.list
+        sudo apt-get update
+        sudo apt-get install -y google-chrome-stable
+        
+        echo "✅ Chrome установлен:"
+        google-chrome --version
+
+    # 5.1. Кешируем Chrome
+#    - name: Cache Chrome
+#      uses: actions/cache@v4
+#      with:
+#        path: ~/.cache/google-chrome
+#        key: ${{ runner.os }}-chrome-${{ hashFiles('**/apt-get') }}
+
+
+    # 6. Запускаем тесты и собираем данные для Allure
+    - name: Run tests and collect Allure data
+      run: |
+        # Создаем папку для результатов Allure
+        mkdir -p allure-results     
+        
+        # Запускаем тесты с сохранением данных для Allure
+        python -m pytest tests/ \
+          -v \
+          --alluredir=allure-results  # ← ключевой параметр
+
+  # 7. Устанавливаем Allure CLI и генерируем отчет
+    - name: Generate Allure report
+      if: always()  # Выполняем даже если тесты упали
+      run: |
+        # Устанавливаем Allure CLI (версия 2.29.0)
+        ALLURE_VERSION=2.29.0  # Обновил версию до 2.29.0
+        curl -o allure-$ALLURE_VERSION.tgz -Ls https://github.com/allure-framework/allure2/releases/download/$ALLURE_VERSION/allure-$ALLURE_VERSION.tgz
+        tar -zxvf allure-$ALLURE_VERSION.tgz -C /opt/
+        sudo ln -s /opt/allure-$ALLURE_VERSION/bin/allure /usr/bin/allure
+        
+        # Генерируем HTML отчет
+        allure generate allure-results -o allure-report --clean
+        
+        echo "📊 Allure отчет сгенерирован в allure-report/"
+        
+        echo "📁 Содержимое allure-report:"
+        ls -la allure-report
+
+    # 8. Сохраняем отчет как артефакт (можно скачать)
+    - name: Upload Allure report as artifact
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: allure-report
+        path: allure-report/
+        retention-days: 7
+
+    # 9. Деплоим отчет на GitHub Pages (опционально)
+    - name: Deploy Allure report to GitHub Pages
+      #  если push идет в ветку main или если это событие pull request
+      # if: github.ref == 'refs/heads/main' || github.event_name == 'pull_request'
+      if: always()
+      uses: peaceiris/actions-gh-pages@v4
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./allure-report
+        keep_files: false
+
+    # 10. Выводим ссылку на отчет
+    - name: Display Allure report URL
+      if: always()
+      run: |
+        echo ""
+        echo "🚀 CI/CD Pipeline Completed Successfully!"
+        echo "================================================"
+        echo ""
+        echo "📊 ALLURE TEST REPORT"
+        echo "   🌐 View online: https://dendiyoker.github.io/main_test_framework/"
+        echo "   📥 Download: Go to Actions → Artifacts → allure-report"
+        echo ""
+        echo "⚡ QUICK LINKS"
+        echo "   🔍 View Details: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+        echo "   📚 Repository: https://github.com/${{ github.repository }}"
+        echo ""
+        echo "🔄 Next Steps:"
+        echo "   • Review the test results"
+        echo "   • Check failed tests if any"
+        echo "   • Update tests if needed"
+        echo "================================================"
+        echo ""

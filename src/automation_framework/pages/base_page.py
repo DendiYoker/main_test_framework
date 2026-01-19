@@ -1,11 +1,11 @@
 import time
 import allure
 
-from core.logging import log
-from core.page import Page
-from core.web_element import WebElementHelper
-from core import env_settings as ES
-from selenium.common.exceptions import InvalidSessionIdException
+from automation_framework.configs.config import ConfigurationTest
+from automation_framework.core.logging import log
+from automation_framework.core.page import Page
+from automation_framework.core.web_element import WebElementHelper
+
 
 
 class WebBasePage(Page):
@@ -13,7 +13,7 @@ class WebBasePage(Page):
 
     @staticmethod
     def открыть_web_страницу(url):
-        ES.driver_chrome.get(url)
+        ConfigurationTest.driver_chrome.get(url)
         log(f'Открыта web страница {url}')
 
 
@@ -26,7 +26,7 @@ class WebBasePage(Page):
     def screenshot(str_time=0):
         # ToDo слишком быстро скринит, в итоге белый экран подумать про ожидание загрузки странциы, пока костыль time
         time.sleep(str_time)
-        allure.attach(ES.driver_chrome.get_screenshot_as_png(), name='screenshot',
+        allure.attach(ConfigurationTest.driver.get_screenshot_as_png(), name='screenshot',
                       attachment_type=allure.attachment_type.PNG)
 
     @staticmethod
@@ -41,5 +41,5 @@ class WebBasePage(Page):
 
     @staticmethod
     def закрыть_окно_браузера():
-        ES.driver_chrome.close()
+        ConfigurationTest.driver.close()
         log(f'Текущее окно браузера закрыто')

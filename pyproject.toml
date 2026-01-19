@@ -1,0 +1,46 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"] # Что нужно для сборки пакета
+build-backend = "setuptools.build_meta"  # Как собирать (стандартный setuptools)
+
+[project]
+name = "automation-framework"
+version = "0.1.0"
+description = "Test automation framework with Selenium and Allure"
+authors = [{name = "Dendi Yoker", email = "denis.yuryevich.p@yandex.ru"},]
+readme = "README.md"
+requires-python = ">=3.13"
+
+dependencies = [
+    "allure-pytest>=2.13.5",
+    "allure-python-commons>=2.13.5",
+    "pytest>=8.2.2",
+    "pytest-check>=2.6.2",
+    "pillow>=10.0.0",
+    "selenium>=4.22.0",
+    "webdriver-manager>=4.0.1",
+]
+
+[project.optional-dependencies] # ГРУППЫ ЗАВИСИМОСТЕЙ
+dev = [
+    "flake8>=7.0.0",        # Линтер (проверка стиля кода)
+    "black>=24.0.0",       # Автоформатировщик кода
+
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+addopts = [
+    "-v",
+    "--strict-markers",
+    "--alluredir=allure-results",
+]
+markers = [
+    "smoke: Быстрые smoke-тесты",
+    "regression: Регрессионные тесты",
+    "feature: маркер для тестов фич",
+    "slow: медленные тесты",
+]
