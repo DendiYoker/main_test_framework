@@ -1,4 +1,0 @@
-2026-01-19 21:29:25,510 - INFO - добавлены настройки по стенду: {'url': "'url psi'", 'bd': "{'host':'testhosts', 'database':'TEST', 'user': 'testov','pwd':'3333'}"} из config.ini, в env_settings.stand_settings 
-2026-01-19 21:29:25,511 - INFO - setup metod: test_002
-2026-01-19 21:29:25,512 - INFO - teardown_method запущен
-2026-01-19 21:29:25,512 - INFO - Драйвер браузера закрыт
