@@ -1,0 +1,4 @@
+2026-01-19 21:29:25,507 - INFO - добавлены настройки по стенду: {'url': "'url psi'", 'bd': "{'host':'testhosts', 'database':'TEST', 'user': 'testov','pwd':'3333'}"} из config.ini, в env_settings.stand_settings 
+2026-01-19 21:29:25,508 - INFO - setup metod: test_authorization
+2026-01-19 21:29:25,508 - INFO - teardown_method запущен
+2026-01-19 21:29:25,509 - INFO - Драйвер браузера закрыт
